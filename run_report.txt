@@ -1,0 +1,38 @@
+﻿Username Checker Report
+Generated: 2026-03-07 18:27:50
+
+=== AVAILABLE ===
+(none)
+
+=== TAKEN ===
+(none)
+
+=== UNKNOWN ===
+(none)
+
+=== ERROR ===
+bob | DeviantArt | https://www.deviantart.com/bob
+bob | Facebook | https://www.facebook.com/bob
+bob | GitHub | https://github.com/bob
+bob | GitLab | https://gitlab.com/bob
+bob | Instagram | https://www.instagram.com/bob/
+bob | Kick | https://kick.com/bob
+bob | LinkedIn | https://www.linkedin.com/in/bob
+bob | Medium | https://medium.com/@bob
+bob | OnlyFans | https://onlyfans.com/bob
+bob | Patreon | https://www.patreon.com/bob
+bob | Pinterest | https://www.pinterest.com/bob/
+bob | Reddit | https://www.reddit.com/user/bob/
+bob | Roblox | https://www.roblox.com/user.aspx?username=bob
+bob | Snapchat | https://www.snapchat.com/add/bob
+bob | SoundCloud | https://soundcloud.com/bob
+bob | Spotify | https://open.spotify.com/user/bob
+bob | Steam | https://steamcommunity.com/id/bob
+bob | Threads | https://www.threads.net/@bob
+bob | TikTok | https://www.tiktok.com/@bob
+bob | Tumblr | https://bob.tumblr.com
+bob | Twitch | https://www.twitch.tv/bob
+bob | Vimeo | https://vimeo.com/bob
+bob | X (Twitter) | https://x.com/bob
+bob | YouTube | https://www.youtube.com/@bob
+

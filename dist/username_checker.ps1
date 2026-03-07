@@ -1,6 +1,7 @@
 param(
     [string]$InputUsernames,
-    [string]$InputFile
+    [string]$InputFile,
+    [string]$OutputFile
 )
 
 Set-StrictMode -Version Latest
@@ -163,6 +164,50 @@ function Show-Results {
     Write-Host "Summary: taken=$taken, available=$available, unknown=$unknown, error=$error"
 }
 
+function Write-ReportFile {
+    param(
+        [Parameter(Mandatory = $true)]
+        [System.Collections.IEnumerable]$AllResults,
+        [string]$OutputFileArg
+    )
+
+    $targetPath = $OutputFileArg
+    if ([string]::IsNullOrWhiteSpace($targetPath)) {
+        $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+        $targetPath = "username_report_$timestamp.txt"
+    }
+
+    $available = @($AllResults | Where-Object { $_.Status -eq "available" } | Sort-Object Username, Platform)
+    $taken = @($AllResults | Where-Object { $_.Status -eq "taken" } | Sort-Object Username, Platform)
+    $unknown = @($AllResults | Where-Object { $_.Status -eq "unknown" } | Sort-Object Username, Platform)
+    $error = @($AllResults | Where-Object { $_.Status -eq "error" } | Sort-Object Username, Platform)
+
+    $lines = New-Object System.Collections.Generic.List[string]
+    $null = $lines.Add("Username Checker Report")
+    $null = $lines.Add("Generated: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")")
+    $null = $lines.Add("")
+
+    foreach ($section in @(
+        @{ Name = "AVAILABLE"; Items = $available },
+        @{ Name = "TAKEN"; Items = $taken },
+        @{ Name = "UNKNOWN"; Items = $unknown },
+        @{ Name = "ERROR"; Items = $error }
+    )) {
+        $null = $lines.Add("=== $($section.Name) ===")
+        if ($section.Items.Count -eq 0) {
+            $null = $lines.Add("(none)")
+        } else {
+            foreach ($item in $section.Items) {
+                $null = $lines.Add(("{0} | {1} | {2}" -f $item.Username, $item.Platform, $item.Url))
+            }
+        }
+        $null = $lines.Add("")
+    }
+
+    Set-Content -LiteralPath $targetPath -Value $lines -Encoding UTF8
+    return (Resolve-Path -LiteralPath $targetPath).Path
+}
+
 Write-Host "Username Checker - social + streaming platforms"
 $usernames = @(Get-UsernamesFromInput -InputUsernamesArg $InputUsernames -InputFileArg $InputFile)
 
@@ -174,10 +219,24 @@ if ($usernames.Count -eq 0) {
 $platforms = Get-Platforms
 Write-Host ""
 Write-Host ("Checking {0} username(s) on {1} platforms..." -f $usernames.Count, $platforms.Count)
+$allResults = New-Object System.Collections.Generic.List[object]
 
 foreach ($username in $usernames) {
     $results = foreach ($platform in $platforms) {
         Test-UsernameOnPlatform -Username $username -Platform $platform
     }
     Show-Results -Username $username -Results $results
+
+    foreach ($row in $results) {
+        $null = $allResults.Add([PSCustomObject]@{
+            Username = $username
+            Platform = $row.Platform
+            Status = $row.Status
+            Url = $row.Url
+        })
+    }
 }
+
+$reportPath = Write-ReportFile -AllResults $allResults -OutputFileArg $OutputFile
+Write-Host ""
+Write-Host "Report written to: $reportPath"
