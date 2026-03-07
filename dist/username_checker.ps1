@@ -143,6 +143,36 @@ function Get-UsernamesFromInput {
     return Parse-Usernames -Raw $raw
 }
 
+function Resolve-OutputPath {
+    param(
+        [string]$OutputFileArg,
+        [bool]$IsInteractive
+    )
+
+    if (-not [string]::IsNullOrWhiteSpace($OutputFileArg)) {
+        return $OutputFileArg
+    }
+
+    if (-not $IsInteractive) {
+        return $null
+    }
+
+    Write-Host ""
+    Write-Host "Report output options:"
+    Write-Host "1. Default location (current folder, auto filename)"
+    Write-Host "2. Custom location"
+    $choice = Read-Host "Choose 1 or 2"
+
+    if ($choice -eq "2") {
+        $customPath = Read-Host "Enter full or relative output file path"
+        if (-not [string]::IsNullOrWhiteSpace($customPath)) {
+            return $customPath.Trim()
+        }
+    }
+
+    return $null
+}
+
 function Show-Results {
     param(
         [Parameter(Mandatory = $true)]
@@ -209,6 +239,7 @@ function Write-ReportFile {
 }
 
 Write-Host "Username Checker - social + streaming platforms"
+$isInteractive = [string]::IsNullOrWhiteSpace($InputUsernames) -and [string]::IsNullOrWhiteSpace($InputFile)
 $usernames = @(Get-UsernamesFromInput -InputUsernamesArg $InputUsernames -InputFileArg $InputFile)
 
 if ($usernames.Count -eq 0) {
@@ -237,6 +268,7 @@ foreach ($username in $usernames) {
     }
 }
 
-$reportPath = Write-ReportFile -AllResults $allResults -OutputFileArg $OutputFile
+$resolvedOutputPath = Resolve-OutputPath -OutputFileArg $OutputFile -IsInteractive $isInteractive
+$reportPath = Write-ReportFile -AllResults $allResults -OutputFileArg $resolvedOutputPath
 Write-Host ""
 Write-Host "Report written to: $reportPath"
